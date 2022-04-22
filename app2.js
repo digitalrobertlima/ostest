@@ -18,11 +18,12 @@ function printVolume (volume) {
 }
 
 function contarWhileBid(objeto, i, whileAmount, amountWhile) {
+	let mediaCompra = 0;
+	let compradores = 0;
         if (whileAmount >= amountWhile) {
                 let price = parseFloat(objeto.bids[i].price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 console.log("Compra sugerida: " + green.bold(price) + " " + whileAmount + " BTC");
-                
-        } else {}
+	} else {}
 }
 
 function contarWhileAsk(objeto, i, whileAsk, amountWhile) {
@@ -83,14 +84,53 @@ function imprimeForca(objeto) {
         console.log("Força de venda(40 pessoas): " + red(somaVendas.toFixed(8)) + " BTC's");
 }
 
+function imprimeMediaAsks(book) {
+	let somaPrecos = 0;                           let quantidade = 0;                                                                         for (let i = 0; i < 40; i++) {
+		let order = book.asks[i].price;                                                             let orderAmount = book.asks[i].amount;                                                      if (orderAmount > 0.1) {
+			somaPrecos = somaPrecos + order;
+			quantidade = quantidade + 1;                                                          } else {}                             }
+
+        if (quantidade > 0) {
+
+		let media = somaPrecos/quantidade;
+                console.log("Soma preços: " + somaPrecos + " " +
+ quantidade + "\nMédia: " + media);
+        }
+
+        //console.log(book);
+}
+
+function imprimeMediaBids(book) {
+
+	let somaPrecos = 0;
+	let quantidade = 0;
+
+	for (let i = 0; i < 40; i++) {
+		let order = book.bids[i].price;
+		let orderAmount = book.bids[i].amount;
+		if (orderAmount > 0.1) {
+			somaPrecos = somaPrecos + order;
+			quantidade = quantidade++;
+		} else {}
+	}
+
+	if (quantidade > 0) {
+		console.log("Soma de preços: " + somaPrecos + " " + quantidade);
+	}
+
+	//console.log(book);
+}
+
 function imprimeBook(objeto) {
         
         imprimeForca(objeto);
         melhorPreco(objeto);
         imprimeWhile(objeto);
+	imprimeMediaBids(objeto);
+	imprimeMediaAsks(objeto);
 }
 
-function imprimeTicker(objeto) {
+async function imprimeTicker(objeto) {
         
         let lastPrice = parseFloat(objeto.last).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         let volume = parseFloat(objeto.vol);
@@ -102,7 +142,7 @@ function imprimeTicker(objeto) {
 
         //console.log(objeto);
 
-        console.log(yellow.bold("\nEste é um resumo do mercado atual: " + green(market) + "\n" + timestamp));
+        console.log(yellow.bold("\nEste é um resumo do mercado atual: " + green(market) + "\n" + "Timestamp: " + timestamp));
 
         printPrice(lastPrice);
         printVolume(volume);
@@ -110,14 +150,14 @@ function imprimeTicker(objeto) {
         variacao24horas(variacao);
 }
 
-function definirObjeto(objeto) {
+async function definirObjeto(objeto) {
 
         let tamanhoObjeto = Object.keys(objeto).length;
 
         if (tamanhoObjeto == 11) {
 
                 console.log(blue.bold('\nAguardando ticker...'));
-                imprimeTicker(objeto);
+                await imprimeTicker(objeto);
 
         } else if (tamanhoObjeto == 4) {
 
@@ -129,13 +169,13 @@ function definirObjeto(objeto) {
         }
 }
 
-function getJSON(url) {
+async function getJSON(url) {
         
         const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
         const request = new XMLHttpRequest();
 
-        request.open("GET", url, false);
-        request.send();
+        await request.open("GET", url, false);
+        await request.send();
 
         let obj = JSON.parse(request.responseText);
         definirObjeto(obj);
@@ -143,20 +183,20 @@ function getJSON(url) {
         return
 }
 
-function getPrice(ticker, orderbook) {
+async function getPrice(ticker, orderbook) {
 
-        getJSON(ticker);
+        await getJSON(ticker);
 
         //console.log(obj);
 
-        getJSON(orderbook);
+        await getJSON(orderbook);
 
         //console.log(obj);
 }
 
-function main() {
+async function main() {
         console.log(yellow('\nCarregando...'));
-        getPrice(urlTicker, urlOrderbook);
+        await getPrice(urlTicker, urlOrderbook);
         
         return
 }
@@ -166,3 +206,5 @@ console.log(green('\nAbrindo API... Por favor aguarde!'));
 main();
 
 setInterval(main, 5000);
+
+//return
